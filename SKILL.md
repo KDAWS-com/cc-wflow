@@ -163,7 +163,7 @@ Before running, verify in order. Fail fast — stop on first failure with action
         ```yaml
         repos:
           - repo: https://github.com/gitleaks/gitleaks
-            rev: v8.30.0
+            rev: 6eaad039603a4de39fddd1cf5f727391efe9974e  # v8.30.0
             hooks:
               - id: gitleaks
         ```
