@@ -449,7 +449,7 @@ Check required tools per platform. If missing, ask permission to install:
 
 ### Scan Steps
 
-1. **Run scans** (parallel where possible, scoped to PR diff via `--baseline-commit`):
+1. **Run scans** (parallel where possible, semgrep scoped to PR diff via `--baseline-commit`; other tools scan full codebase):
 
    PHP/Laravel/WordPress:
    ```bash
