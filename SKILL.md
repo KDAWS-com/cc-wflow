@@ -26,9 +26,9 @@ Run `kdaws:wf-setup` to set up an existing project. Run `kdaws:project-setup` to
 | `kdaws:wf-setup` | Set up an existing project with templates, labels, and CLAUDE.md section |
 | `kdaws:wf-full #N` | Run full pipeline: brainstorm → plan → (deepen?) → technical review → work → review → compound |
 | `kdaws:wf-simple #N` | Run simple pipeline: plan → work |
-| Individual stages | `/workflows:brainstorm #N`, `/workflows:plan #N`, `/deepen-plan`, `/technical_review #N`, `/workflows:work #N`, `/workflows:review`, `/workflows:compound #N` |
+| Individual stages *(compound-engineering plugin)* | `/workflows:brainstorm #N`, `/workflows:plan #N`, `/deepen-plan`, `/technical_review #N`, `/workflows:work #N`, `/workflows:review`, `/workflows:compound #N` |
 
-Issue number (`#N`) is **required** for all commands except `/workflows:review`, `kdaws:wf-setup`, and `kdaws:project-setup`.
+Issue number (`#N`) is **required** for all commands except `/workflows:review`, `kdaws:wf-setup`, and `kdaws:project-setup`. Validate: digits only, positive integer.
 
 ## Project Setup: `kdaws:project-setup`
 
@@ -46,7 +46,7 @@ Before running, verify in order. Fail fast — stop on first failure with action
 
 1. **Ask for project description** — Use AskUserQuestion: "What does this project do? Describe it in 1-2 sentences."
 
-2. **Generate repo name** — Extract key nouns from description, convert to kebab-case, target 2-4 words, max 50 chars. Remove articles (a, an, the) and common stop words. Present to user: "Suggested repo name: `{name}`. Use this name?" If user rejects, ask them to provide a preferred name. Validate: lowercase, hyphens only, no leading/trailing hyphens, 1-100 chars.
+2. **Generate repo name** — Generate a kebab-case repo name from the description (2-4 words). Present to user: "Suggested repo name: `{name}`. Use this name?" If user rejects, ask them to provide a preferred name. Validate: lowercase, hyphens only, no leading/trailing hyphens, 1-100 chars.
 
 3. **Choose owner** — Query available targets:
    ```bash
@@ -60,7 +60,7 @@ Before running, verify in order. Fail fast — stop on first failure with action
    2. {org-1}
    3. {org-2}
    ```
-   If org listing fails or returns empty, offer personal account with option to type an org name manually.
+   If org listing fails or returns empty, offer personal account with option to type an org name manually. Validate any manually-typed owner name: alphanumeric and hyphens only, cannot start with a hyphen, max 39 chars (GitHub username constraints).
 
 4. **Check for collisions** — Before creating anything:
    ```bash
@@ -108,21 +108,6 @@ Before running, verify in order. Fail fast — stop on first failure with action
 
 9. **Auto-chain into `kdaws:wf-setup`** — Announce: "Project created. Running workflow setup..." Then execute `kdaws:wf-setup`, skipping its prerequisite checks (they were already verified in step 1-3 and the repo was just created).
 
-### Progress Output
-
-```
-Creating project '{name}'...
-✅ Repository name: {name}
-✅ Owner: {owner}
-✅ Local directory created
-✅ Git repository initialized
-✅ README.md generated
-✅ Remote repository created: https://github.com/{owner}/{name}
-✅ Initial commit pushed
-
-Running workflow setup...
-```
-
 ## Workflow Setup: `kdaws:wf-setup`
 
 Set up an existing project for the GitHub Issue-driven workflow.
@@ -131,9 +116,12 @@ Set up an existing project for the GitHub Issue-driven workflow.
 
 Before running, verify in order. Fail fast — stop on first failure with actionable guidance.
 
+> **Note:** When invoked from `kdaws:project-setup`, skip all prerequisites below (they were already verified).
+
 1. **compound-engineering plugin installed** — Check `~/.claude/plugins/cache/every-marketplace/compound-engineering/` exists. Required for stage commands.
-2. **`gh` CLI installed and authenticated** — Run `gh --version` and `gh auth status`.
-3. **Connected to a GitHub repo** — Run `gh repo view --json nameWithOwner`. If no repo detected, offer to run `kdaws:project-setup`. If user accepts, invoke it and return (project-setup will chain back, skipping these prerequisites).
+2. **`gh` CLI installed** — Run `gh --version`.
+3. **`gh` authenticated** — Run `gh auth status`.
+4. **Connected to a GitHub repo** — Run `gh repo view --json nameWithOwner`. If no repo detected, offer to run `kdaws:project-setup`. If user accepts, invoke it and return (project-setup will chain back, skipping these prerequisites).
 
 ### What it does
 
@@ -147,7 +135,7 @@ Before running, verify in order. Fail fast — stop on first failure with action
 1. Check if `.github/ISSUE_TEMPLATE/` already exists. If so, ask: "Issue templates already exist. Overwrite?"
 2. Copy templates from the skill's `templates/` directory:
    ```bash
-   SKILL_DIR=$(dirname "$0")  # or use the skill's root path
+   # Use the skill's installed directory (the directory containing this SKILL.md file)
    mkdir -p .github/ISSUE_TEMPLATE
    cp "${SKILL_DIR}/templates/feature.md" .github/ISSUE_TEMPLATE/
    cp "${SKILL_DIR}/templates/bug.md" .github/ISSUE_TEMPLATE/
@@ -231,22 +219,13 @@ Emoji prefixes: 🔍 Brainstorm, 📋 Plan, 🔎 Technical Review, 📚 Lessons 
 |-----------|--------|
 | `todos/` | **Frozen** — no new files. Existing pending todos stay as-is. |
 | `docs/brainstorms/` | For standalone exploration only (not tied to an issue) |
+| `docs/plans/` | **Deprecated** — plans are now posted as issue comments, not stored locally |
 | `docs/solutions/` | Active — `/workflows:compound` writes here |
 ```
 
 ### After Init
 
-Report what was set up:
-```
-✅ Issue templates created in .github/ISSUE_TEMPLATE/
-✅ Labels created: p1, p2, p3, refactor
-✅ Auto-delete head branches enabled
-✅ Workflow section added to CLAUDE.md
-
-You're ready to go! Try:
-  kdaws:wf-full #N   — Run full pipeline for an issue
-  kdaws:wf-simple #N — Quick plan → implement for a small fix
-```
+Report what was created and suggest `kdaws:wf-full #N` and `kdaws:wf-simple #N` as next steps.
 
 ## Detection and Prompting
 
@@ -320,10 +299,7 @@ Run the complete pipeline for issue `#N`.
 6. **Confirm before implementation** — Ask: "Plan reviewed. Ready to start coding? (review the plan on the issue thread first)". Wait for user confirmation.
 7. **Work** — Invoke `/workflows:work #N`. Creates branch and **draft** PR.
 8. **Review** — Convert to ready-for-review via `gh pr ready`, then invoke `/workflows:review`. Posts review comments on PR.
-9. **Resolve fixes** — If review has findings:
-   - Simple fixes: ask if user wants to run `/resolve_pr_parallel`
-   - Complex fixes: ask if user wants to run `/triage`
-   - Then optionally re-run `/workflows:review` (max 2 review cycles)
+9. **Resolve fixes** — If review has findings, see [Rework and Rejection Paths](#rework-and-rejection-paths).
 10. **Compound** — After merge, invoke `/workflows:compound #N`. Documents lessons learned.
 
 ### Between Stages
@@ -369,16 +345,6 @@ All stage outputs posted to issues use this format:
 </details>
 ```
 
-### Stage Reference
-
-| Stage | `{stage}` value | Emoji | Summary Text |
-|-------|----------------|-------|-------------|
-| Brainstorm | `brainstorm` | 🔍 | `Brainstorm — YYYY-MM-DD` |
-| Plan | `plan` | 📋 | `Implementation Plan — YYYY-MM-DD` |
-| Deepened Plan | `plan` | 📋 | `Implementation Plan (Deepened) — YYYY-MM-DD` |
-| Technical Review | `technical-review` | 🔎 | `Technical Review — YYYY-MM-DD` |
-| Compound | `compound` | 📚 | `Lessons Learned — YYYY-MM-DD` |
-
 ### Posting Comments
 
 ```bash
@@ -408,61 +374,21 @@ Use `<!-- workflow-stage: {stage} -->` as the machine-readable marker. The emoji
 
 ## Stage Command Reference
 
-Quick input/output specs for each compound-engineering stage command.
+These are compound-engineering plugin commands. Naming conventions (underscores in `/technical_review`, kebab in `/deepen-plan`) are upstream — not controlled by this skill. Validate issue number `#N` before use: digits only.
 
-### `/workflows:brainstorm #N`
+For error handling on all commands, see the [Error Handling](#error-handling) section.
 
-- **Input:** Issue `#N` body
-- **Output:** Brainstorm document exploring approaches, decisions, trade-offs
-- **Side effects:** Posts collapsible comment on issue `#N` (stage: `brainstorm`)
-
-### `/workflows:plan #N`
-
-- **Input:** Issue `#N` body + brainstorm comment (if exists)
-- **Output:** Step-by-step implementation plan with file list, acceptance criteria
-- **Side effects:** Posts collapsible comment on issue `#N` (stage: `plan`)
-
-### `/deepen-plan`
-
-- **Input:** Most recent plan comment on the issue
-- **Output:** Enhanced plan with parallel research
-- **Side effects:** Posts deepened plan as new collapsible comment (stage: `plan`, summary includes "Deepened")
-
-### `/technical_review #N`
-
-- **Input:** Most recent plan comment on issue `#N`
-- **Output:** Parallel review from DHH, Kieran, and Simplicity reviewers
-- **Side effects:** Posts collapsible comment on issue `#N` (stage: `technical-review`)
-
-### `/workflows:work #N`
-
-- **Input:** Most recent plan comment on issue `#N`
-- **Output:** Code changes on new branch, committed and pushed as **draft** PR
-- **Side effects:** Creates branch `{type}/{N}-{slug}`, opens draft PR with `Closes #{N}`
-
-### `/workflows:review`
-
-- **Input:** Current PR (from current branch)
-- **Output:** Multi-agent code review findings as PR comments
-- **Side effects:** Converts draft to ready-for-review via `gh pr ready`, posts review comments
-
-### `/resolve_pr_parallel`
-
-- **Input:** Current PR review comments
-- **Output:** Auto-resolves agreed-upon simple fixes
-- **Side effects:** Commits fixes to PR branch
-
-### `/triage`
-
-- **Input:** Current PR review comments
-- **Output:** Interactive walkthrough of each finding with user
-- **Side effects:** User decides per-finding (fix, skip, wontfix)
-
-### `/workflows:compound #N`
-
-- **Input:** Issue `#N` thread + PR diff + review comments
-- **Output:** Documented lesson in `docs/solutions/{category}/`
-- **Side effects:** Posts summary as collapsible comment (stage: `compound`), writes solution file
+| Command | Input | Output | Posts to | Stage / Emoji |
+|---------|-------|--------|----------|---------------|
+| `/workflows:brainstorm #N` | Issue body | Approaches, decisions, trade-offs | Issue (comment) | `brainstorm` 🔍 |
+| `/workflows:plan #N` | Issue body + brainstorm | Implementation plan with file list | Issue (comment) | `plan` 📋 |
+| `/deepen-plan` | Most recent plan comment | Enhanced plan with parallel research | Issue (comment, summary includes "Deepened") | `plan` 📋 |
+| `/technical_review #N` | Most recent plan comment | Review from DHH, Kieran, Simplicity agents | Issue (comment) | `technical-review` 🔎 |
+| `/workflows:work #N` | Most recent plan comment | Code on new branch, draft PR | Creates branch + draft PR | — |
+| `/workflows:review` | Current PR | Multi-agent code review | PR (comments) | — |
+| `/resolve_pr_parallel` | PR review comments | Auto-resolved simple fixes | Commits to PR branch | — |
+| `/triage` | PR review comments | Interactive walkthrough per finding | User decides per-finding | — |
+| `/workflows:compound #N` | Issue thread + PR diff | Lesson in `docs/solutions/` | Issue (comment) | `compound` 📚 |
 
 ## Issue Creation
 
