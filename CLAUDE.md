@@ -20,7 +20,7 @@ All development work is tracked via GitHub Issues. Every feature, bug, and refac
 - `/workflows:work #N`, `/workflows:review`, `/workflows:compound #N`
 - `/resolve_pr_parallel`, `/triage`
 
-Issue number (`#N`) is a **required argument** for all commands except `/workflows:review` and `quality:security-review`.
+Issue number (`#N`) is a **required argument** for all commands except `/workflows:review`, `quality:security-review`, `wflow:setup`, and `wflow:project-setup`.
 
 ### Issue Conventions
 

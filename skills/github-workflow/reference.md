@@ -41,9 +41,10 @@ These are compound-engineering plugin commands. Naming conventions (underscores 
 
 The `wflow` orchestrator expects the following from `quality:security-review`:
 
+- **Invocation:** Use the Skill tool: `skill: "quality:security-review"` (no arguments needed).
 - **Input:** Runs on current branch/PR context. No arguments required.
 - **Output:** Posts a collapsible PR comment with `<!-- workflow-stage: security-review -->` marker.
 - **Return signal:** Comment summary line contains `PASS` or `FAIL`.
 - **Cycle ownership:** The wflow orchestrator owns the 3-cycle limit. It counts invocations and escalates after the 3rd failure. The quality plugin does not track cycles.
 - **Install command:** `/plugin install quality@kdaws`
-- **Minimum version:** 1.0.0
+- **Minimum version:** 1.0.0 (version checking is not enforced at runtime; both plugins are co-maintained).

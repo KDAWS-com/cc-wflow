@@ -5,7 +5,7 @@ description: >
   Commands: wflow:full, wflow:simple, wflow:setup, wflow:project-setup.
   Trigger: "work on issue", "start feature", "fix bug", describing new functionality or bugs.
 argument-hint: "#issue-number"
-allowed-tools: Bash(gh issue *), Bash(gh pr *), Bash(gh label *), Bash(gh repo create *), Bash(gh repo view *), Bash(gh repo edit *), Bash(gh api user), Bash(gh api user/orgs), Bash(gh api repos/*/issues/*/comments *), Bash(gh auth status), Bash(gh --version), Bash(git init), Bash(git add *), Bash(git commit *), Bash(git merge-base *), Bash(git push *), Bash(git checkout *), Bash(git branch *), Bash(git status), Bash(git diff *), Bash(git log *), Read, Write, Edit, Task, Skill
+allowed-tools: Bash(gh issue *), Bash(gh pr *), Bash(gh label *), Bash(gh repo create *), Bash(gh repo view *), Bash(gh repo edit *), Bash(gh api user), Bash(gh api user/orgs), Bash(gh api repos/*/issues/*/comments *), Bash(gh auth status), Bash(gh --version), Bash(git init), Bash(git add *), Bash(git commit *), Bash(git merge-base *), Bash(git push *), Bash(git checkout *), Bash(git branch *), Bash(git status), Bash(git diff *), Bash(git log *), Bash(mkdir *), Bash(cp *), Bash(ls *), Bash(test *), Read, Write, Edit, Task, Skill
 ---
 
 # GitHub Issue-Driven Development Workflow
@@ -47,6 +47,8 @@ SKILL_DIR="./skills/github-workflow"
 ```
 
 > **Note:** This split departs from the issue #1 single-file consolidation learning, justified by the 500-line plugin skill constraint that did not exist when that learning was documented.
+
+> **Known limitation:** The `SKILL_DIR` glob resolution assumes a single cached version of the plugin. If multiple versions exist in the cache, `head -1` picks whichever sorts first alphabetically. This is acceptable for v1.0.0 — revisit when Claude Code provides native skill-relative path resolution.
 
 ## Git Safety
 
@@ -234,7 +236,7 @@ All development work is tracked via GitHub Issues. Every feature, bug, and refac
 - `/workflows:work #N`, `/workflows:review`, `/workflows:compound #N`
 - `/resolve_pr_parallel`, `/triage`
 
-Issue number (`#N`) is a **required argument** for all commands except `/workflows:review` and `quality:security-review`.
+Issue number (`#N`) is a **required argument** for all commands except `/workflows:review`, `quality:security-review`, `wflow:setup`, and `wflow:project-setup`.
 
 ### Issue Conventions
 

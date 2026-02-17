@@ -24,7 +24,7 @@ Merged `command-contracts.md` into `SKILL.md` and converted verbose per-command 
 
 ### 3. Prerequisite checks need explicit recursion guards
 
-`wflow:project-setup` chains into `wflow:setup`, which can offer to run `wflow:project-setup`. Without an explicit guard, an AI agent could loop. The fix: a visible blockquote at the top of `wf-setup` prerequisites saying "When invoked from `wflow:project-setup`, skip all prerequisites below."
+`wflow:project-setup` chains into `wflow:setup`, which can offer to run `wflow:project-setup`. Without an explicit guard, an AI agent could loop. The fix: a visible blockquote at the top of `wflow:setup` prerequisites saying "When invoked from `wflow:project-setup`, skip all prerequisites below."
 
 **Lesson:** When two commands can invoke each other, add the recursion guard at the *entry point* of the callee, not just in the caller's instructions. AI agents need the guard visible at the point where they make the decision.
 
