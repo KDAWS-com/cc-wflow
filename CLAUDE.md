@@ -42,6 +42,8 @@ Issue number (`#N`) is a **required argument** for all commands except `/workflo
 
 **All stage outputs MUST be posted in full to GitHub (issue comments or PR comments). NEVER write stage outputs to local files.** Do not split content between GitHub and disk. Do not write a summary to GitHub and details to a local file. The GitHub issue thread is the single source of truth.
 
+**Comments are append-only.** NEVER edit existing issue comments, PR descriptions, or PR comments. Always post a new comment. The only exception is correcting a genuine factual error (wrong issue number, broken link). If a review finds issues that get fixed, post a new comment describing what was found, what was fixed, and anything deferred with reasoning.
+
 Each workflow stage posts a collapsible comment on the issue thread:
 
 ```markdown

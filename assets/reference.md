@@ -8,6 +8,8 @@ These are compound-engineering plugin commands. Naming conventions (underscores 
 
 **Important:** All stage outputs go to GitHub (issue or PR comments) — never to local files. If a stage command writes output to disk, capture the content, post it to GitHub, and delete the local file.
 
+**Important:** Comments are append-only. Never edit existing issue comments, PR descriptions, or PR comments. Post new comments for updates, fixes, and revisions. Only edit to correct factual errors (wrong issue number, broken link).
+
 | Command | Input | Output | Posts to | Stage / Emoji |
 |---------|-------|--------|----------|---------------|
 | `/workflows:brainstorm #N` | Issue body | Approaches, decisions, trade-offs | Issue (comment) | `brainstorm` 🔍 |

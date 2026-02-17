@@ -20,6 +20,13 @@ Run the quick pipeline for a GitHub issue. No brainstorm, technical review, code
 
 The GitHub issue thread IS the single source of truth. No exceptions.
 
+## Critical Rule: Append-Only Comments
+
+**NEVER edit existing issue comments, PR descriptions, or PR comments.** Always post a new comment instead. The comment history is an audit trail.
+
+- If fixes are made after a review, post a **new** comment listing what was found, what was fixed, and anything left unresolved with reasoning.
+- Only edit a comment if it contains a factual error (wrong issue number, broken link, etc.).
+
 ## Pre-flight Checks (run before any work)
 
 1. **Verify compound-engineering plugin:**
